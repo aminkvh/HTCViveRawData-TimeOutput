@@ -249,6 +249,31 @@ void dprintf( const char *fmt, ... )
 	OutputDebugStringA( buffer );
 }
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
+const char *outputfile = "output.txt";
+void insertinfile(const char *fmt, ...)
+{
+	va_list args;
+	char buffer[2048];
+
+	va_start(args, fmt);
+	vsprintf_s(buffer, fmt, args);
+	va_end(args);
+
+	//if (g_bPrintf)
+	//{
+	std::ofstream out;
+
+	out.open(outputfile, std::ios::app);
+
+	std::string str = buffer;
+	out << str;
+	//}
+
+}
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -647,7 +672,13 @@ void CMainApplication::printDevicePositionalData(const char * deviceName, vr::Hm
         position.v[0], position.v[1], position.v[2],
         quaternion.w, quaternion.x, quaternion.y, quaternion.z);
 
+#pragma region insertinfile
+	insertinfile("\n%lld, %s, x = %.5f, y = %.5f, z = %.5f, qw = %.5f, qx = %.5f, qy = %.5f, qz = %.5f",
+		qpc.QuadPart, deviceName,
+		position.v[0], position.v[1], position.v[2],
+		quaternion.w, quaternion.x, quaternion.y, quaternion.z);
 
+#pragma endregion
     // Uncomment this if you want to print entire transform matrix that contains both position and rotation matrix.
     //dprintf("\n%lld,%s,%.5f,%.5f,%.5f,x: %.5f,%.5f,%.5f,%.5f,y: %.5f,%.5f,%.5f,%.5f,z: %.5f,qw: %.5f,qx: %.5f,qy: %.5f,qz: %.5f",
     //    qpc.QuadPart, whichHand.c_str(),
@@ -1964,8 +1995,23 @@ void CGLRenderModel::Draw()
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+
+
+
+
 int main(int argc, char *argv[])
 {
+
+
+	#pragma region ClearFile
+
+	std::ofstream ofs;
+	ofs.open(outputfile, std::ofstream::out | std::ofstream::trunc);
+	ofs.close();
+
+	#pragma endregion
+
+	//----------------------------
 	CMainApplication *pMainApplication = new CMainApplication( argc, argv );
 
 	if (!pMainApplication->BInit())
